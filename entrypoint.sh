@@ -12,25 +12,27 @@
 
 ALL_IMAGE_TAG=()
 
-echo "Authenticating docker to gcloud ..."
-if ! echo $INPUT_GCLOUD_SERVICE_KEY | python -m base64 -d >/tmp/key.json 2>/dev/null; then
-    if ! echo $INPUT_GCLOUD_SERVICE_KEY >/tmp/key.json 2>/dev/null; then
-        echo "Failed to get gcloud_service_key. It could be plain text or base64 encoded service account JSON file"
-        exit 1
-    else
-        echo "This action is unable to decode INPUT_GCLOUD_SERVICE_KEY as base64. It assumes INPUT_GCLOUD_SERVICE_KEY as plain text."
-    fi
-else
-    echo "Successfully decoded from base64"
-fi
+# echo "Authenticating docker to gcloud ..."
+# if ! echo $INPUT_GCLOUD_SERVICE_KEY | python -m base64 -d >/tmp/key.json 2>/dev/null; then
+#     if ! echo $INPUT_GCLOUD_SERVICE_KEY >/tmp/key.json 2>/dev/null; then
+#         echo "Failed to get gcloud_service_key. It could be plain text or base64 encoded service account JSON file"
+#         exit 1
+#     else
+#         echo "This action is unable to decode INPUT_GCLOUD_SERVICE_KEY as base64. It assumes INPUT_GCLOUD_SERVICE_KEY as plain text."
+#     fi
+# else
+#     echo "Successfully decoded from base64"
+# fi
 
-if cat /tmp/key.json | docker login -u _json_key --password-stdin https://$INPUT_REGISTRY; then
-    echo "Logged in to google cloud ..."
-else
-    echo "Docker login failed. Exiting ..."
-    exit 1
-fi
+# if cat /tmp/key.json | docker login -u _json_key --password-stdin https://$INPUT_REGISTRY; then
+#     echo "Logged in to google cloud ..."
+# else
+#     echo "Docker login failed. Exiting ..."
+#     exit 1
+# fi
 
+echo "Configure Docker login with gcloud"
+gcloud auth configure-docker
 # split -> trim -> compact -> uniq -> bash array
 ALL_IMAGE_TAG=($(python -c "print(' '.join(list(set([v for v in [v.strip() for v in '$INPUT_IMAGE_TAG'.split(',')] if v]))))"))
 
